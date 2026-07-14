@@ -2,6 +2,10 @@ import os
 from dotenv import load_dotenv
 from openai import OpenAI
 import config
+import json
+from chat import get_response
+from handle_commands import handle_commands
+from utils import add_user_message, add_assistant_message
 
 load_dotenv()
 
@@ -12,35 +16,42 @@ if api_key is None:
 
 client = OpenAI(api_key=api_key, base_url=config.BASE_URL)
 
-messages = [
-    {"role": "system", "content": config.SYSTEM_PROMPT},
-]
+print(r"  /######  /##       /######        /######   /######   /######  /######  /######  /######## \
+ /##__  ##| ##      |_  ##_/       /##__  ## /##__  ## /##__  ##|_  ##_/ /##__  ##|__  ##__/ \
+| ##  \__/| ##        | ##        | ##  \ ##| ##  \__/| ##  \__/  | ##  | ##  \__/   | ##   \
+| ##      | ##        | ##        | ########|  ###### |  ######   | ##  |  ######    | ##   \
+| ##      | ##        | ##        | ##__  ## \____  ## \____  ##  | ##   \____  ##   | ##   \
+| ##    ##| ##        | ##        | ##  | ## /##  \ ## /##  \ ##  | ##   /##  \ ##   | ##   \
+|  ######/| ######## /######      | ##  | ##|  ######/|  ######/ /######|  ######/   | ##   \
+ \______/ |________/|______/      |__/  |__/ \______/  \______/ |______/ \______/    |__/  ")
 
-print("Hello. Welcome to CLI Programming Assistant. Write your query below:")
+print("\nWelcome to the CLI Programming Assistant. Get started by writing your query below:")
 
-while True:
-    assistant_response = ""
-    user_input = input("\n> ")
 
-    if user_input == "exit":
-        break
+def chat():
+    last_usage = None
+    messages = [
+        {"role": "system", "content": config.SYSTEM_PROMPT},
+    ]
+    while True:
+        assistant_response = ""
+        user_input = input("\n> ")
+        print("")
 
-    messages.append({"role": "user", "content": user_input})
+        if user_input.startswith("/"):
+            handle_commands(user_input, messages, last_usage)
+            continue
 
-    response = client.chat.completions.create(
-        model=config.MODEL_FLASH,
-        messages=messages,
-        max_tokens=config.MAX_TOKENS,
-        temperature=config.TEMPERATURE,
-        stream=True,
-        extra_body={"thinking": {"type": "disabled"}},
-    )
+        if user_input == "exit":
+            break
 
-    for chunk in response:
-        delta = chunk.choices[0].delta.content or ""
-        assistant_response += delta
-        print(delta, end="", flush=True)
+        add_user_message(messages, user_input)
 
-    messages.append({"role": "assistant", "content": assistant_response})
+        usage, assistant_response = get_response(client, messages, assistant_response)
+        last_usage = usage
 
-    print(messages)
+        add_assistant_message(messages, assistant_response)
+
+
+if __name__ == "__main__":
+    chat()
