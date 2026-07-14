@@ -7,9 +7,9 @@ load_dotenv()
 
 api_key = os.getenv("DEEPSEEK_API_KEY")
 
-app = OpenAI(api_key=api_key, base_url=config.BASE_URL)
+client = OpenAI(api_key=api_key, base_url=config.BASE_URL)
 
-response = app.chat.completions.create(
+response = client.chat.completions.create(
     model=config.MODEL_FLASH,
     messages=[
         {"role": "system", "content": config.SYSTEM_PROMPT},
