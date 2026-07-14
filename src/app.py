@@ -7,6 +7,9 @@ load_dotenv()
 
 api_key = os.getenv("DEEPSEEK_API_KEY")
 
+if api_key is None:
+    print("DeepSeek API key not found.")
+
 client = OpenAI(api_key=api_key, base_url=config.BASE_URL)
 
 response = client.chat.completions.create(
