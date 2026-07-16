@@ -6,6 +6,7 @@ import json
 from chat import get_response
 from handle_commands import handle_commands
 from utils import add_user_message, add_assistant_message
+from summarize import summarize_conversation
 
 load_dotenv()
 
@@ -17,7 +18,8 @@ if api_key is None:
 client = OpenAI(api_key=api_key, base_url=config.BASE_URL)
 
 
-print(r"┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\
+print(
+    r"┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\
 ┃                                                                                               ┃\
 ┃ / ###### / ##       /######        /######   /######   /######  /######  /######  /########   ┃\
 ┃ /##__  ##| ##      |_  ##_/       /##__  ## /##__  ## /##__  ##|_  ##_/ /##__  ##|__  ##__/   ┃\
@@ -38,9 +40,12 @@ print(r"┏━━━━━━━━━━━━━━━━━━━━━━━
 ┃                                                                                               ┃\
 ┃      Type /help for available commands                                                        ┃\
 ┃                                                                                               ┃\
-┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛")
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛"
+)
 
-print("\nWelcome to the CLI Programming Assistant. Get started by writing your query below:")
+print(
+    "\nWelcome to the CLI Programming Assistant. Get started by writing your query below:"
+)
 
 
 def chat():
@@ -63,6 +68,15 @@ def chat():
         last_usage = usage
 
         add_assistant_message(messages, assistant_response)
+
+        if usage.prompt_tokens > config.SUMMARY_THRESHOLD_TOKENS:
+            print("\nSUMMARY THRESHOLD REACHED. SUMMARIZING THE CONVERSATION...")
+            summary, recent_messages = summarize_conversation(client, messages)
+            messages = [
+                {"role": "system", "content": config.SYSTEM_PROMPT},
+                {"role": "system", "content": f"Conversation summary:\n{summary}"},
+            ]
+            messages.extend(recent_messages)
 
 
 if __name__ == "__main__":
