@@ -13,7 +13,7 @@ load_dotenv()
 api_key = os.getenv("DEEPSEEK_API_KEY")
 
 if api_key is None:
-    exit("DeepSeek API key not found.")
+    exit("DeepSeek API key not found. \nPlease ensure your .env file is configured correctly.")
 
 client = OpenAI(api_key=api_key, base_url=config.BASE_URL)
 
