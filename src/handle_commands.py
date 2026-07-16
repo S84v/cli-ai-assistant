@@ -42,7 +42,7 @@ def handle_commands(user_input: str, messages: list, last_usage):
         ]
 
     elif user_input == "/help":
-        print("=================== CLI PROGRAMMING ASSISTANT ===================")
+        print("==================== LLM CLI GUIDE ====================")
         print()
         print("Type any programming question and press Enter.")
         print("General Commands")
@@ -73,7 +73,7 @@ def handle_commands(user_input: str, messages: list, last_usage):
         print("> Write a binary search in C++")
         print("> Debug this traceback")
         print("> Optimize this function")
-        print("===============================================================")
+        print("=======================================================")
     else:
         print("Command not recognized. Please refer to the guide by typing /help.")
     return messages
